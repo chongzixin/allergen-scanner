@@ -81,8 +81,14 @@ export default function AllergyScannerApp(): JSX.Element {
       const dataUrl = canvas.toDataURL("image/png");
 
       try {
-        const result = await Tesseract.recognize(dataUrl, "eng");
-        const words = result.data.text.split(" ") || [];
+        const { createWorker } = Tesseract;
+        const worker = await createWorker("eng");
+        const result = await worker.recognize(dataUrl, undefined, {
+          text: true,
+          blocks: true,
+        });
+        const blocks = result.data.blocks || [];
+        console.log(result);
 
         const found: string[] = [];
 
@@ -91,9 +97,8 @@ export default function AllergyScannerApp(): JSX.Element {
 
         overlayCtx.clearRect(0, 0, overlay.width, overlay.height);
 
-        words.forEach((word) => {
-          console.log(word);
-          const lowerWord = word.toLowerCase();
+        blocks.forEach((block) => {
+          const lowerWord = block.text.toLowerCase();
           allergies.forEach((allergy) => {
             if (lowerWord.includes(allergy)) {
               found.push(allergy);
@@ -101,19 +106,99 @@ export default function AllergyScannerApp(): JSX.Element {
               overlayCtx.strokeStyle = "red";
               overlayCtx.lineWidth = 2;
               overlayCtx.strokeRect(
-                word.bbox.x0,
-                word.bbox.y0,
-                word.bbox.x1 - word.bbox.x0,
-                word.bbox.y1 - word.bbox.y0
+                block.bbox.x0,
+                block.bbox.y0,
+                block.bbox.x1 - block.bbox.x0,
+                block.bbox.y1 - block.bbox.y0
               );
               overlayCtx.font = "16px sans-serif";
               overlayCtx.fillStyle = "red";
-              overlayCtx.fillText(word, word.bbox.x0, word.bbox.y0 - 4);
+              overlayCtx.fillText(block.text, block.bbox.x0, block.bbox.y0 - 4);
             }
           });
         });
 
-        setDetectedAllergens([...new Set(found)]);
+        setDetectedAllergens(Array.from(new Set(found)));
+      } catch (err) {
+        console.error("OCR error:", err);
+      }
+    }, 3000);
+
+    return () => clearInterval(scanInterval);
+  }, [scanning, allergies]);
+
+  useEffect(() => {
+    let initialized = false;
+
+    const scanInterval = setInterval(async () => {
+      if (
+        !scanning ||
+        !videoRef.current ||
+        !canvasRef.current ||
+        !overlayRef.current
+      )
+        return;
+
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const overlay = overlayRef.current;
+
+      if (video.videoWidth === 0 || video.videoHeight === 0) return;
+
+      if (!initialized) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        overlay.width = video.videoWidth;
+        overlay.height = video.videoHeight;
+        initialized = true;
+      }
+
+      const ctx = canvas.getContext("2d");
+      const overlayCtx = overlay.getContext("2d");
+      if (!ctx || !overlayCtx) return;
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/png");
+
+      try {
+        const { createWorker } = Tesseract;
+        const worker = await createWorker("eng");
+        const result = await worker.recognize(dataUrl, undefined, {
+          text: true,
+          blocks: true,
+        });
+        const blocks = result.data.blocks || [];
+        console.log(result);
+
+        const found: string[] = [];
+
+        const overlayCtx = overlay.getContext("2d");
+        if (!overlayCtx) return;
+
+        overlayCtx.clearRect(0, 0, overlay.width, overlay.height);
+
+        blocks.forEach((block) => {
+          const lowerWord = block.text.toLowerCase();
+          allergies.forEach((allergy) => {
+            if (lowerWord.includes(allergy)) {
+              found.push(allergy);
+              console.log("MATCH");
+              overlayCtx.strokeStyle = "red";
+              overlayCtx.lineWidth = 2;
+              overlayCtx.strokeRect(
+                block.bbox.x0,
+                block.bbox.y0,
+                block.bbox.x1 - block.bbox.x0,
+                block.bbox.y1 - block.bbox.y0
+              );
+              overlayCtx.font = "16px sans-serif";
+              overlayCtx.fillStyle = "red";
+              overlayCtx.fillText(block.text, block.bbox.x0, block.bbox.y0 - 4);
+            }
+          });
+        });
+
+        setDetectedAllergens(Array.from(new Set(found)));
       } catch (err) {
         console.error("OCR error:", err);
       }
@@ -153,19 +238,19 @@ export default function AllergyScannerApp(): JSX.Element {
         ))}
       </div>
 
-      <div className="relative w-full max-w-xl">
+      <div className="relative w-full max-w-xl aspect-video">
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          className="w-full rounded-xl shadow"
+          className="absolute top-0 left-0 w-full h-full object-cover rounded-xl shadow"
         />
-        <canvas ref={canvasRef} style={{ display: "none" }} />
         <canvas
           ref={overlayRef}
           className="absolute top-0 left-0 w-full h-full pointer-events-none"
         />
+        <canvas ref={canvasRef} style={{ display: "none" }} />
       </div>
 
       <div>
