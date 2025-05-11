@@ -25,6 +25,7 @@ export default function AllergyScannerApp(): JSX.Element {
   const [currentAllergy, setCurrentAllergy] = useState<string>("");
   const [detectedAllergens, setDetectedAllergens] = useState<string[]>([]);
   const [scanning, setScanning] = useState<boolean>(false);
+  const [ocrRawText, setOcrRawText] = useState<string>("");
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -92,11 +93,12 @@ export default function AllergyScannerApp(): JSX.Element {
         const { createWorker } = Tesseract;
         const worker = await createWorker("eng");
         const result = await worker.recognize(dataUrl, undefined, {
-          text: false,
+          text: true,
           blocks: true,
         });
         const blocks = result.data.blocks || [];
         console.log(result);
+        setOcrRawText(result.data.text || "");
 
         const found: string[] = [];
 
@@ -187,6 +189,13 @@ export default function AllergyScannerApp(): JSX.Element {
               <li key={idx}>{item}</li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {ocrRawText && (
+        <div className="ocr-debug">
+          <h3>OCR Raw Text:</h3>
+          <pre>{ocrRawText}</pre>
         </div>
       )}
     </div>

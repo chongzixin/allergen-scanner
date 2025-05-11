@@ -3,6 +3,17 @@
   text-align: center;
 }
 
+.ocr-debug {
+  margin-top: 1rem;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+
 /* General Styles for the Container */
 .container {
   padding: 16px;
