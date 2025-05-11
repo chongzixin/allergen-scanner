@@ -135,17 +135,17 @@ export default function AllergyScannerApp(): JSX.Element {
       <div className="input-container">
         <input
           type="text"
-          className="input-field"
+          className="input"
           placeholder="Add allergy (e.g. peanut)"
           value={currentAllergy}
           onChange={(e) => setCurrentAllergy(e.target.value)}
         />
-        <button onClick={addAllergy} className="button">
+        <button onClick={addAllergy} className="btn-add">
           Add
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="allergies-list">
         {allergies.map((allergy, index) => (
           <span key={index} className="allergy-item">
             {allergy}
@@ -153,26 +153,26 @@ export default function AllergyScannerApp(): JSX.Element {
         ))}
       </div>
 
-      <div className="video-container">
-        <video ref={videoRef} autoPlay playsInline muted className="video" />
-        <canvas ref={overlayRef} className="overlay" />
-        <canvas ref={canvasRef} style={{ display: "none" }} />
-      </div>
-
-      <div>
+      <div className="buttons-container">
         {scanning ? (
-          <button className="button button-red" onClick={stopCamera}>
+          <button className="btn-stop" onClick={stopCamera}>
             Stop Scanning
           </button>
         ) : (
-          <button className="button button-green" onClick={startCamera}>
-            <CameraIcon className="w-4 h-4" />
+          <button className="btn-start" onClick={startCamera}>
+            <CameraIcon className="icon" />
             <span>Start Scanning</span>
           </button>
         )}
       </div>
 
-      {detectedAllergens.length > 0 && (
+      <div className="video-wrapper">
+        <video ref={videoRef} autoPlay playsInline muted className="video" />
+        <canvas ref={overlayRef} className="canvas-overlay" />
+        <canvas ref={canvasRef} style={{ display: "none" }} />
+      </div>
+
+      {detectedAllergens.length >= 0 && (
         <div className="warning-box">
           <h2 className="warning-title">Warning: Allergens Found!</h2>
           <ul className="warning-list">

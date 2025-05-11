@@ -3,14 +3,16 @@
   text-align: center;
 }
 
-/* src/styles.css */
+/* General Styles for the Container */
 .container {
   padding: 16px;
-  space-y: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
 }
 
 .title {
-  font-size: 24px;
+  font-size: 2rem;
   font-weight: bold;
 }
 
@@ -19,42 +21,89 @@
   gap: 8px;
 }
 
-.input-field {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
+.input {
+  padding: 8px 16px;
   border-radius: 4px;
+  border: 1px solid #ccc;
   width: 100%;
 }
 
-.button {
+.btn-add {
   padding: 8px 16px;
-  border-radius: 4px;
-  background-color: #3182ce;
+  background-color: #3498db;
   color: white;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
 }
 
-.button-red {
-  background-color: #e53e3e;
-}
-
-.button-green {
-  background-color: #48bb78;
+.allergies-list {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .allergy-item {
-  background-color: #fed7d7;
-  color: #e53e3e;
+  background-color: #f8d7da;
+  color: #721c24;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 14px;
 }
 
-.video-container {
+.buttons-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-stop,
+.btn-start {
+  padding: 10px 20px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-start {
+  background-color: #2ecc71;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
+
+.warning-box {
+  margin-top: 20px;
+  border: 2px solid #e74c3c;
+  padding: 16px;
+  background-color: #f8d7da;
+  border-radius: 6px;
+}
+
+.warning-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #721c24;
+}
+
+.warning-list {
+  list-style-type: disc;
+  padding-left: 20px;
+  color: #721c24;
+}
+
+/* Video container wrapper to ensure proper aspect ratio */
+.video-wrapper {
   position: relative;
   width: 100%;
-  max-width: 640px;
-  aspect-ratio: 16 / 9;
+  height: 0;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio (landscape) by default */
 }
 
 .video {
@@ -63,34 +112,46 @@
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.overlay {
+.canvas-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none;
 }
 
-.warning-box {
-  margin-top: 16px;
-  border: 2px solid #e53e3e;
-  padding: 16px;
-  border-radius: 8px;
+/* Portrait Mode for mobile (9:16 aspect ratio) */
+@media (max-width: 768px) {
+  .video-wrapper {
+    padding-bottom: 177.78%; /* 9:16 aspect ratio for portrait */
+  }
+
+  /* Make the video fill the container in portrait mode */
+  .video {
+    object-fit: cover;
+  }
 }
 
-.warning-title {
-  font-size: 20px;
-  font-weight: bold;
-  color: #e53e3e;
+/* Landscape Mode for tablets and small screens */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .video-wrapper {
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  }
+
+  .video {
+    object-fit: cover;
+  }
 }
 
-.warning-list {
-  padding-left: 20px;
-  list-style-type: disc;
+/* Desktop Mode */
+@media (min-width: 1025px) {
+  .video-wrapper {
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  }
+
+  .video {
+    object-fit: cover;
+  }
 }
