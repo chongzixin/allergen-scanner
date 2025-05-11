@@ -14,7 +14,14 @@ interface WordBox {
 }
 
 export default function AllergyScannerApp(): JSX.Element {
-  const [allergies, setAllergies] = useState<string[]>([]);
+  // add predefined list of allergies
+  const [allergies, setAllergies] = useState<string[]>([
+    "egg",
+    "fish",
+    "peanut",
+    "sesame",
+    "corn",
+  ]);
   const [currentAllergy, setCurrentAllergy] = useState<string>("");
   const [detectedAllergens, setDetectedAllergens] = useState<string[]>([]);
   const [scanning, setScanning] = useState<boolean>(false);
@@ -85,7 +92,7 @@ export default function AllergyScannerApp(): JSX.Element {
         const { createWorker } = Tesseract;
         const worker = await createWorker("eng");
         const result = await worker.recognize(dataUrl, undefined, {
-          text: true,
+          text: false,
           blocks: true,
         });
         const blocks = result.data.blocks || [];
@@ -130,7 +137,7 @@ export default function AllergyScannerApp(): JSX.Element {
 
   return (
     <div className="container">
-      <h1 className="title">Allergy Scanner (AR)</h1>
+      <h1 className="title">Audrey's Food Scanner</h1>
 
       <div className="input-container">
         <input
@@ -172,7 +179,7 @@ export default function AllergyScannerApp(): JSX.Element {
         <canvas ref={canvasRef} style={{ display: "none" }} />
       </div>
 
-      {detectedAllergens.length >= 0 && (
+      {detectedAllergens.length > 0 && (
         <div className="warning-box">
           <h2 className="warning-title">Warning: Allergens Found!</h2>
           <ul className="warning-list">
