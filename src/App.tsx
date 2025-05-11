@@ -158,27 +158,6 @@ export default function AllergyScannerApp(): JSX.Element {
     <div className="container">
       <h1 className="title">Audrey's Food Scanner</h1>
 
-      <div className="input-container">
-        <input
-          type="text"
-          className="input"
-          placeholder="Add allergy (e.g. peanut)"
-          value={currentAllergy}
-          onChange={(e) => setCurrentAllergy(e.target.value)}
-        />
-        <button onClick={addAllergy} className="btn-add">
-          Add
-        </button>
-      </div>
-
-      <div className="allergies-list">
-        {allergies.map((allergy, index) => (
-          <span key={index} className="allergy-item">
-            {allergy}
-          </span>
-        ))}
-      </div>
-
       <div className="buttons-container">
         {scanning ? (
           <button className="btn-stop" onClick={stopCamera}>
@@ -215,6 +194,27 @@ export default function AllergyScannerApp(): JSX.Element {
           <pre>{ocrRawText}</pre>
         </div>
       )}
+
+      <div className="input-container">
+        <input
+          type="text"
+          className="input"
+          placeholder="Add allergy (e.g. peanut)"
+          value={currentAllergy}
+          onChange={(e) => setCurrentAllergy(e.target.value)}
+        />
+        <button onClick={addAllergy} className="btn-add">
+          Add
+        </button>
+      </div>
+
+      <div className="allergies-list">
+        {allergies.map((allergy, index) => (
+          <span key={index} className="allergy-item">
+            {allergy}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
