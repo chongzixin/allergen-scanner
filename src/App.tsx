@@ -13,6 +13,13 @@ interface WordBox {
   };
 }
 
+// debug
+declare global {
+  interface Window {
+    __originalConsoleLog?: (...args: any[]) => void;
+  }
+}
+
 export default function AllergyScannerApp(): JSX.Element {
   // add predefined list of allergies
   const [allergies, setAllergies] = useState<string[]>([
@@ -48,6 +55,26 @@ export default function AllergyScannerApp(): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const overlayRef = useRef<HTMLCanvasElement | null>(null);
 
+  // debug
+  const [debugText, setDebugText] = useState<string>("");
+
+  useEffect(() => {
+    if (!window.__originalConsoleLog) {
+      window.__originalConsoleLog = console.log;
+
+      console.log = (...args: any[]) => {
+        setDebugText((prev) =>
+          [
+            ...prev.split("\n").slice(-20), // keep last 20 logs
+            args.map((a) => String(a)).join(" "),
+          ].join("\n")
+        );
+
+        window.__originalConsoleLog?.(...args); // call original
+      };
+    }
+  }, []);
+
   const addAllergy = (): void => {
     if (currentAllergy.trim() !== "") {
       setAllergies([...allergies, currentAllergy.toLowerCase()]);
@@ -66,6 +93,45 @@ export default function AllergyScannerApp(): JSX.Element {
     });
     if (videoRef.current) {
       videoRef.current.srcObject = stream;
+    }
+
+    // Try to manually set focus via track (if supported)
+    const track = stream.getVideoTracks()[0];
+    const capabilities = track.getCapabilities?.() as any;
+    console.log("Capabilities:", capabilities);
+
+    if ("focusMode" in capabilities || "focusDistance" in capabilities) {
+      try {
+        const constraints: any = {
+          advanced: [],
+        };
+
+        // apply focusMode only if it supports auto or continuous
+        if (
+          "focusMode" in capabilities &&
+          (capabilities.focusMode.includes("auto") ||
+            capabilities.focusMode.includes("continuous"))
+        ) {
+          const supportedFocusMode = capabilities.focusMode.inclues("auto")
+            ? "auto"
+            : "continuous";
+          constraints.advanced.push({ focusMode: supportedFocusMode });
+          console.log("Supported focus modes:", capabilities.focusMode);
+        }
+        if ("focusDistance" in capabilities) {
+          constraints.advanced.push({
+            focusDistance: capabilities.focusDistance.min,
+          });
+          console.log("focusDistance exists");
+        }
+
+        await track.applyConstraints(constraints);
+        console.log("Applied focus constraints:", constraints);
+      } catch (err) {
+        console.log("Failed to apply focus constraints:", err);
+      }
+    } else {
+      console.log("Focus-related capabilities not supported on this device.");
     }
   };
 
@@ -170,6 +236,24 @@ export default function AllergyScannerApp(): JSX.Element {
           </button>
         )}
       </div>
+
+      {/* {debugText && (
+        <div
+          style={{
+            whiteSpace: "pre-wrap",
+            fontSize: "12px",
+            color: "#111",
+            background: "#f4f4f4",
+            padding: "0.5rem",
+            border: "1px solid #ccc",
+            marginTop: "1rem",
+          }}
+        >
+          <strong>Debug log:</strong>
+          <br />
+          {debugText}
+        </div>
+      )} */}
 
       <div className="video-wrapper">
         <video ref={videoRef} autoPlay playsInline muted className="video" />
