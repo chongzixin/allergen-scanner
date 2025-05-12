@@ -222,7 +222,7 @@ export default function AllergyScannerApp(): JSX.Element {
 
   return (
     <div className="container">
-      <h1 className="title">Audrey's Food Scanner</h1>
+      <h1 className="title">No-Scratching Scanner</h1>
 
       <div className="buttons-container">
         {scanning ? (
